@@ -106,24 +106,23 @@ pub struct Indexer<'odb> {
 impl<'odb> Indexer<'odb> {
     /// Create a new indexer
     ///
-    /// The [`Odb`] is used to resolve base objects when fixing thin packs and
-    /// to check connectivity. libgit2 stores a bare `git_odb *` without taking
-    /// a reference, so a `Some(&odb)` borrow must outlive the indexer.
+    /// The [`Odb`] is used to resolve base objects when fixing thin packs.
+    /// libgit2 stores a bare `git_odb *` without taking a reference, so a
+    /// `Some(&odb)` borrow must outlive the indexer.
     ///
     /// Pass `None` when the pack is self-contained: libgit2 accepts a NULL ODB,
     /// but it cannot resolve a thin pack's external bases. Such a pack is
     /// rejected when [`Indexer::commit`] resolves the pending deltas, with
     /// "cannot fix a thin pack without an ODB".
     ///
-    /// When `verify` is enabled, connectivity is still checked. An object
-    /// referenced by the pack but absent from it cannot be resolved without an
-    /// ODB, so the commit fails; this is not a skipped external-reference check.
+    /// `verify` controls object connectivity checks. When `true`, every object
+    /// referenced by the pack must be present in the pack or resolvable through
+    /// the ODB; a missing external object makes the commit fail. When `false`,
+    /// connectivity checks are skipped.
     ///
     /// `path` is the directory where the packfile should be stored.
     ///
     /// `mode` is the permissions to use for the output files, use `0` for defaults.
-    ///
-    /// If `verify` is `false`, the indexer will bypass object connectivity checks.
     ///
     /// This creates an indexer assuming SHA1 object format. Use
     /// [`Indexer::new_ext`] to specify a different format.
